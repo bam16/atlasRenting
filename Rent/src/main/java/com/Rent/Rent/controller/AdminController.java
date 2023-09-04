@@ -4,11 +4,10 @@ import com.Rent.Rent.Role;
 import com.Rent.Rent.model.RentalOwner;
 import com.Rent.Rent.model.Renter;
 import com.Rent.Rent.model.User;
-import com.Rent.Rent.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.Rent.Rent.service.AdminService;
 import java.util.List;
 
 @RestController
@@ -46,39 +45,39 @@ public class AdminController {
         return ResponseEntity.ok(user);
     }
 
-    @PutMapping("/users/{userId}/role")
+    @PutMapping("/users/{username}/role")
     public ResponseEntity<String> updateUserRole(
-            @PathVariable Long userId,
+            @PathVariable String username,
             @RequestParam Role newRole
     ) {
-        adminService.updateUserRole(userId, newRole);
+        adminService.updateUserRole(username, newRole);
         return ResponseEntity.ok("User role updated");
     }
 
-    @PutMapping("/users/{userId}/status")
+    @PutMapping("/users/{username}/status")
     public ResponseEntity<String> updateUserStatus(
-            @PathVariable Long userId,
+            @PathVariable String username,
             @RequestParam boolean active
     ) {
-        adminService.updateUserStatus(userId, active);
+        adminService.updateUserStatus(username, active);
         return ResponseEntity.ok("User status updated");
     }
 
-    @PutMapping("/rental-owners/{ownerId}/status")
+    @PutMapping("/rental-owners/{ownerUsername}/status")
     public ResponseEntity<String> updateRentalOwnerStatus(
-            @PathVariable Long ownerId,
+            @PathVariable String username,
             @RequestParam boolean active
     ) {
-        adminService.updateRentalOwnerStatus(ownerId, active);
+        adminService.updateRentalOwnerStatus(username, active);
         return ResponseEntity.ok("Rental owner status updated");
     }
 
-    @PutMapping("/renters/{renterId}/status")
+    @PutMapping("/renters/{renterUsername}/status")
     public ResponseEntity<String> updateRenterStatus(
-            @PathVariable Long renterId,
+            @PathVariable String username,
             @RequestParam boolean active
     ) {
-        adminService.updateRenterStatus(renterId, active);
+        adminService.updateRenterStatus(username, active);
         return ResponseEntity.ok("Renter status updated");
     }
 
@@ -99,31 +98,31 @@ public class AdminController {
         RentalOwner rentalOwner = adminService.createRentalOwner(username, password);
         return ResponseEntity.ok(rentalOwner);
     }
-        @PutMapping("/users/{userId}")
+        @PutMapping("/users/{username}")
         public ResponseEntity<User> updateUser(
-                @PathVariable Long userId,
+                @PathVariable String username,
                 @RequestParam String newUsername,
                 @RequestParam String newPassword,
                 @RequestParam Role newRole
         ) {
-            User updatedUser = adminService.updateUser(userId, newUsername, newPassword, newRole);
+            User updatedUser = adminService.updateUser(username, newUsername, newPassword, newRole);
             return ResponseEntity.ok(updatedUser);
         }
-    @DeleteMapping("/users/{userId}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long userId) {
-        ResponseEntity<String> response = adminService.deleteUser(userId);
+    @DeleteMapping("/users/{username}")
+    public ResponseEntity<String> deleteUser(@PathVariable String username) {
+        ResponseEntity<String> response = adminService.deleteUser(username);
         return response;
     }
 
-    @DeleteMapping("/renters/{renterId}")
-    public ResponseEntity<String> deleteRenter(@PathVariable Long renterId) {
-        ResponseEntity<String> response = adminService.deleteRenter(renterId);
+    @DeleteMapping("/renters/{renterUsername}")
+    public ResponseEntity<String> deleteRenter(@PathVariable String username) {
+        ResponseEntity<String> response = adminService.deleteRenter(username);
         return response;
     }
 
-    @DeleteMapping("/rental-owners/{ownerId}")
-    public ResponseEntity<String> deleteRentalOwner(@PathVariable Long ownerId) {
-        ResponseEntity<String> response = adminService.deleteRentalOwner(ownerId);
+    @DeleteMapping("/rental-owners/{ownerUsername}")
+    public ResponseEntity<String> deleteRentalOwner(@PathVariable String username) {
+        ResponseEntity<String> response = adminService.deleteRentalOwner(username);
         return response;
     }
 

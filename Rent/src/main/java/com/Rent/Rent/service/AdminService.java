@@ -7,7 +7,6 @@ import com.Rent.Rent.model.User;
 import com.Rent.Rent.repository.RentalOwnerRepository;
 import com.Rent.Rent.repository.RenterRepository;
 import com.Rent.Rent.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,19 +15,22 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import jakarta.persistence.EntityNotFoundException;
+
 
 @Service
 @Transactional
 public class AdminService {
 
+
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
-    private RentalOwnerRepository rentalOwnerRepository;
+    private RenterRepository renterRepository;
 
     @Autowired
-    private RenterRepository renterRepository;
+    private RentalOwnerRepository rentalOwnerRepository;
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -47,32 +49,52 @@ public class AdminService {
         return userRepository.save(user);
     }
 
-    public void updateUserRole(Long userId, Role newRole) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-        user.setRole(newRole);
-        userRepository.save(user);
+    public ResponseEntity<String> updateUserRole(String username, Role newRole) {
+        Optional<User> userOptional = userRepository.findByUsername(username);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            user.setRole(newRole);
+            userRepository.save(user);
+            return ResponseEntity.ok("User role updated");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
     }
 
-    public void updateUserStatus(Long userId, boolean active) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-        user.setActive(active);
-        userRepository.save(user);
+    public ResponseEntity<String> updateUserStatus(String username, boolean active) {
+        Optional<User> userOptional = userRepository.findByUsername(username);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            user.setActive(active);
+            userRepository.save(user);
+            return ResponseEntity.ok("User status updated");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
     }
 
-    public void updateRentalOwnerStatus(Long ownerId, boolean active) {
-        RentalOwner owner = rentalOwnerRepository.findById(ownerId)
-                .orElseThrow(() -> new EntityNotFoundException("Rental owner not found"));
-        owner.setActive(active);
-        rentalOwnerRepository.save(owner);
+    public ResponseEntity<String> updateRentalOwnerStatus(String username, boolean active) {
+        Optional<RentalOwner> ownerOptional = rentalOwnerRepository.findByUsername(username);
+        if (ownerOptional.isPresent()) {
+            RentalOwner owner = ownerOptional.get();
+            owner.setActive(active);
+            rentalOwnerRepository.save(owner);
+            return ResponseEntity.ok("Rental owner status updated");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Rental owner not found");
+        }
     }
 
-    public void updateRenterStatus(Long renterId, boolean active) {
-        Renter renter = renterRepository.findById(renterId)
-                .orElseThrow(() -> new EntityNotFoundException("Renter not found"));
-        renter.setActive(active);
-        renterRepository.save(renter);
+    public ResponseEntity<String> updateRenterStatus(String username, boolean active) {
+        Optional<Renter> renterOptional = renterRepository.findByUsername(username);
+        if (renterOptional.isPresent()) {
+            Renter renter = renterOptional.get();
+            renter.setActive(active);
+            renterRepository.save(renter);
+            return ResponseEntity.ok("Renter status updated");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Renter not found");
+        }
     }
 
     public Renter createRenter(String username, String password) {
@@ -84,48 +106,50 @@ public class AdminService {
         RentalOwner rentalOwner = new RentalOwner(username, password);
         return rentalOwnerRepository.save(rentalOwner);
     }
-    public User updateUser(Long userId, String newUsername, String newPassword, Role newRole) {
-            User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-            // Update user properties
+    public User updateUser(String username, String newUsername, String newPassword, Role newRole) {
+        Optional<User> userOptional = userRepository.findByUsername(username);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
             user.setUsername(newUsername);
             user.setPassword(newPassword);
             user.setRole(newRole);
-
-            // Save the updated user
             return userRepository.save(user);
+        } else {
+            throw new EntityNotFoundException("User not found");
         }
+    }
 
-
-        public ResponseEntity<String> deleteUser(Long userId) {
-            Optional<User> userOptional = userRepository.findById(userId);
-            if (userOptional.isPresent()) {
-                userRepository.deleteById(userId);
-                return ResponseEntity.ok("User deleted");
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-            }
+    public ResponseEntity<String> deleteUser(String username) {
+        Optional<User> userOptional = userRepository.findByUsername(username);
+        if (userOptional.isPresent()) {
+            userRepository.deleteByUsername(username);
+            return ResponseEntity.ok("User deleted");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
+    }
 
-        public ResponseEntity<String> deleteRenter(Long renterId) {
-            Optional<Renter> renterOptional = renterRepository.findById(renterId);
-            if (renterOptional.isPresent()) {
-                renterRepository.deleteById(renterId);
-                return ResponseEntity.ok("Renter deleted");
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Renter not found");
-            }
+    public ResponseEntity<String> deleteRenter(String username) {
+        Optional<Renter> renterOptional = renterRepository.findByUsername(username);
+        if (renterOptional.isPresent()) {
+            renterRepository.deleteByUsername(username);
+            return ResponseEntity.ok("Renter deleted");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Renter not found");
         }
+    }
 
-        public ResponseEntity<String> deleteRentalOwner(Long ownerId) {
-            Optional<RentalOwner> ownerOptional = rentalOwnerRepository.findById(ownerId);
-            if (ownerOptional.isPresent()) {
-                rentalOwnerRepository.deleteById(ownerId);
-                return ResponseEntity.ok("Rental owner deleted");
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Rental owner not found");
-            }
+    public ResponseEntity<String> deleteRentalOwner(String username) {
+        Optional<RentalOwner> ownerOptional = rentalOwnerRepository.findByUsername(username);
+        if (ownerOptional.isPresent()) {
+            rentalOwnerRepository.deleteByUsername(username);
+            return ResponseEntity.ok("Rental owner deleted");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Rental owner not found");
         }
-
+    }
 }
+
+
+
